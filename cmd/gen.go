@@ -7,9 +7,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const (
-	defaultGenvFilePath   = ".genv.yaml"
-	defaultOutputFilePath = ".env"
+var (
+	genvFilePath   string
+	outputFilePath string
 )
 
 var genCmd = &cobra.Command{
@@ -19,14 +19,14 @@ var genCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := cmd.Context()
 
-		cfg, err := genv.LoadConfig(".genv.yaml")
+		cfg, err := genv.LoadConfig(genvFilePath)
 		if err != nil {
 			return fmt.Errorf("failed to load config: %w", err)
 		}
 
 		generator, err := genv.NewDotenvGenerator(ctx, genv.DotenvGeneratorConfig{
 			Config:         cfg,
-			OutputFilePath: defaultOutputFilePath,
+			OutputFilePath: outputFilePath,
 		})
 
 		if err := generator.Generate(ctx); err != nil {
@@ -38,5 +38,7 @@ var genCmd = &cobra.Command{
 }
 
 func init() {
+	genCmd.Flags().StringVar(&genvFilePath, "config", ".genv.yaml", "Path to the genv config file")
+	genCmd.Flags().StringVar(&outputFilePath, "output", ".env", "Path to the output dotenv file")
 	rootCmd.AddCommand(genCmd)
 }
