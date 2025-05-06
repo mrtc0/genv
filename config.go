@@ -23,7 +23,10 @@ type AwsProvider struct {
 }
 
 type AwsAuth struct {
-	Profile string `yaml:"profile,omitempty"`
+	Profile                string   `yaml:"profile,omitempty"`
+	Region                 string   `yaml:"region,omitempty"`
+	SharedCredentialsFiles []string `yaml:"sharedCredentialsFiles,omitempty"`
+	SharedConfigFiles      []string `yaml:"sharedConfigFiles,omitempty"`
 }
 
 type EnvValue struct {

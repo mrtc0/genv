@@ -1,8 +1,15 @@
 package cmd
 
 import (
+	"fmt"
+
 	"github.com/mrtc0/genv"
 	"github.com/spf13/cobra"
+)
+
+const (
+	defaultGenvFilePath   = ".genv.yaml"
+	defaultOutputFilePath = ".env"
 )
 
 var genCmd = &cobra.Command{
@@ -14,15 +21,16 @@ var genCmd = &cobra.Command{
 
 		cfg, err := genv.LoadConfig(".genv.yaml")
 		if err != nil {
-			return err
+			return fmt.Errorf("failed to load config: %w", err)
 		}
 
 		generator := genv.NewDotenvGenerator(genv.DotenvGeneratorConfig{
-			Config: cfg,
+			Config:         cfg,
+			OutputFilePath: defaultOutputFilePath,
 		})
 
 		if err := generator.Generate(ctx); err != nil {
-			return err
+			return fmt.Errorf("failed to generate .env file: %w", err)
 		}
 
 		return nil

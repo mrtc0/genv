@@ -34,10 +34,6 @@ type dotnevGenerator struct {
 }
 
 func NewDotenvGenerator(config DotenvGeneratorConfig) DotenvGenerator {
-	if config.OutputFilePath == "" {
-		config.OutputFilePath = defaultOutputFilePath
-	}
-
 	return &dotnevGenerator{
 		OutputFilePath: config.OutputFilePath,
 		Config:         config.Config,
@@ -104,7 +100,7 @@ func (d *dotnevGenerator) Generate(ctx context.Context) error {
 func writeDotenvFile(filePath string, dotenv map[string]string) error {
 	f, err := os.Create(filePath)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to create file '%s': %w", filePath, err)
 	}
 	defer f.Close()
 
