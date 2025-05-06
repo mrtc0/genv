@@ -178,3 +178,19 @@ sso_start_url = https://my-sso-portal.awsapps.com/start
 		})
 	}
 }
+
+func TestNewClient(t *testing.T) {
+	t.Parallel()
+
+	providerConfig := &aws.AwsProviderConfig{
+		ID:      "aws",
+		Service: aws.AWSSecretsManager,
+		Region:  "ap-northeast-1",
+		Auth:    aws.AwsAuth{},
+	}
+
+	provider := aws.NewProvider(providerConfig)
+	client, err := provider.NewClient(context.Background())
+	assert.NoError(t, err)
+	assert.NotNil(t, client)
+}

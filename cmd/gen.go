@@ -24,7 +24,7 @@ var genCmd = &cobra.Command{
 			return fmt.Errorf("failed to load config: %w", err)
 		}
 
-		generator := genv.NewDotenvGenerator(genv.DotenvGeneratorConfig{
+		generator, err := genv.NewDotenvGenerator(ctx, genv.DotenvGeneratorConfig{
 			Config:         cfg,
 			OutputFilePath: defaultOutputFilePath,
 		})

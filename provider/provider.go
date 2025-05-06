@@ -7,10 +7,6 @@ const (
 	AWSProviderName ProviderName = "aws"
 )
 
-var (
-	SecretProviders = map[string]Provider{}
-)
-
 type ProviderName string
 
 // Provider is an interface for interacting with secret providers.

@@ -14,34 +14,21 @@ var (
 	dotenv map[string]string = make(map[string]string)
 )
 
-const (
-	defaultGenvFilePath   = ".genv.yaml"
-	defaultOutputFilePath = ".env"
-)
-
-type DotenvGenerator interface {
-	Generate(ctx context.Context) error
-}
-
 type DotenvGeneratorConfig struct {
 	OutputFilePath string
 	Config         *Config
 }
 
-type dotnevGenerator struct {
-	OutputFilePath string
-	Config         *Config
+type DotenvGenerator struct {
+	OutputFilePath        string
+	Config                *Config
+	secretProviderClients map[string]provider.SecretClient
 }
 
-func NewDotenvGenerator(config DotenvGeneratorConfig) DotenvGenerator {
-	return &dotnevGenerator{
-		OutputFilePath: config.OutputFilePath,
-		Config:         config.Config,
-	}
-}
+func NewDotenvGenerator(ctx context.Context, config DotenvGeneratorConfig) (*DotenvGenerator, error) {
+	secretProviderClients := make(map[string]provider.SecretClient)
 
-func (d *dotnevGenerator) Generate(ctx context.Context) error {
-	for _, p := range d.Config.SecretProvider.Aws {
+	for _, p := range config.Config.SecretProvider.Aws {
 		providerConfig := &aws.AwsProviderConfig{
 			ID:      p.ID,
 			Service: aws.AWSSecretsManager,
@@ -52,9 +39,22 @@ func (d *dotnevGenerator) Generate(ctx context.Context) error {
 		}
 
 		awsProvider := aws.NewProvider(providerConfig)
-		provider.SecretProviders[p.ID] = awsProvider
+		client, err := awsProvider.NewClient(ctx)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create secret client: %w", err)
+		}
+
+		secretProviderClients[p.ID] = client
 	}
 
+	return &DotenvGenerator{
+		OutputFilePath:        config.OutputFilePath,
+		Config:                config.Config,
+		secretProviderClients: secretProviderClients,
+	}, nil
+}
+
+func (d DotenvGenerator) Generate(ctx context.Context) error {
 	for key, envValue := range d.Config.Envs {
 		if envValue.Value != "" {
 			dotenv[key] = envValue.Value
@@ -62,16 +62,9 @@ func (d *dotnevGenerator) Generate(ctx context.Context) error {
 		}
 
 		if envValue.SecretRef != nil {
-			providerID := envValue.SecretRef.Provider
-
-			p, ok := provider.SecretProviders[providerID]
+			client, ok := d.secretProviderClients[envValue.SecretRef.Provider]
 			if !ok {
-				return errors.New("provider not found")
-			}
-
-			client, err := p.NewClient(ctx)
-			if err != nil {
-				return err
+				return errors.New("secret provider client not found")
 			}
 
 			secret, err := client.GetSecret(ctx, provider.SecretRef{
@@ -95,6 +88,14 @@ func (d *dotnevGenerator) Generate(ctx context.Context) error {
 	}
 
 	return nil
+}
+
+func (d *DotenvGenerator) AddSecretProviderClient(providerID string, client provider.SecretClient) {
+	if d.secretProviderClients == nil {
+		d.secretProviderClients = make(map[string]provider.SecretClient)
+	}
+
+	d.secretProviderClients[providerID] = client
 }
 
 func writeDotenvFile(filePath string, dotenv map[string]string) error {
