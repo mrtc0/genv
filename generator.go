@@ -7,7 +7,6 @@ import (
 	"os"
 
 	"github.com/mrtc0/genv/provider"
-	"github.com/mrtc0/genv/provider/aws"
 )
 
 var (
@@ -26,25 +25,9 @@ type DotenvGenerator struct {
 }
 
 func NewDotenvGenerator(ctx context.Context, config DotenvGeneratorConfig) (*DotenvGenerator, error) {
-	secretProviderClients := make(map[string]provider.SecretClient)
-
-	for _, p := range config.Config.SecretProvider.Aws {
-		providerConfig := &aws.AwsProviderConfig{
-			ID:      p.ID,
-			Service: aws.AWSSecretsManager,
-			Region:  p.Region,
-			Auth: aws.AwsAuth{
-				Profile: p.Auth.Profile,
-			},
-		}
-
-		awsProvider := aws.NewProvider(providerConfig)
-		client, err := awsProvider.NewClient(ctx)
-		if err != nil {
-			return nil, fmt.Errorf("failed to create secret client: %w", err)
-		}
-
-		secretProviderClients[p.ID] = client
+	secretProviderClients, err := NewSecretProviderClient(ctx, config.Config.SecretProvider)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create secret provider client: %w", err)
 	}
 
 	return &DotenvGenerator{
