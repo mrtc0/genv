@@ -5,10 +5,6 @@ import (
 	"fmt"
 )
 
-var (
-	dotenv map[string]string = make(map[string]string)
-)
-
 type DotenvGeneratorConfig struct {
 	OutputFilePath string
 	Config         *Config
@@ -34,9 +30,11 @@ func NewDotenvGenerator(ctx context.Context, config DotenvGeneratorConfig) (*Dot
 }
 
 func (d *DotenvGenerator) FetchSecrets(ctx context.Context) (map[string]string, error) {
+	envMap := make(map[string]string)
+
 	for key, envValue := range d.Config.Envs {
 		if envValue.Value != "" {
-			dotenv[key] = envValue.Value
+			envMap[key] = envValue.Value
 			continue
 		}
 
@@ -50,11 +48,11 @@ func (d *DotenvGenerator) FetchSecrets(ctx context.Context) (map[string]string, 
 				return nil, fmt.Errorf("failed to get secret %s: %w", key, err)
 			}
 
-			dotenv[key] = string(secret)
+			envMap[key] = string(secret)
 			continue
 		}
 
-		dotenv[key] = ""
+		envMap[key] = ""
 	}
-	return dotenv, nil
+	return envMap, nil
 }
