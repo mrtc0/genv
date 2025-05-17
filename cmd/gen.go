@@ -32,8 +32,13 @@ var genCmd = &cobra.Command{
 			return fmt.Errorf("failed to create dotenv generator: %w", err)
 		}
 
-		if err := generator.Generate(ctx); err != nil {
+		secrets, err := generator.FetchSecrets(ctx)
+		if err != nil {
 			return fmt.Errorf("failed to generate .env file: %w", err)
+		}
+
+		if err := genv.WriteDotenvFile(outputFilePath, secrets); err != nil {
+			return fmt.Errorf("failed to write .env file: %w", err)
 		}
 
 		return nil

@@ -3,7 +3,6 @@ package genv
 import (
 	"context"
 	"fmt"
-	"os"
 )
 
 var (
@@ -34,7 +33,7 @@ func NewDotenvGenerator(ctx context.Context, config DotenvGeneratorConfig) (*Dot
 	}, nil
 }
 
-func (d DotenvGenerator) Generate(ctx context.Context) error {
+func (d *DotenvGenerator) FetchSecrets(ctx context.Context) (map[string]string, error) {
 	for key, envValue := range d.Config.Envs {
 		if envValue.Value != "" {
 			dotenv[key] = envValue.Value
@@ -48,7 +47,7 @@ func (d DotenvGenerator) Generate(ctx context.Context) error {
 			})
 
 			if err != nil {
-				return fmt.Errorf("failed to get secret %s: %w", key, err)
+				return nil, fmt.Errorf("failed to get secret %s: %w", key, err)
 			}
 
 			dotenv[key] = string(secret)
@@ -57,26 +56,5 @@ func (d DotenvGenerator) Generate(ctx context.Context) error {
 
 		dotenv[key] = ""
 	}
-
-	if err := writeDotenvFile(d.OutputFilePath, dotenv); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func writeDotenvFile(filePath string, dotenv map[string]string) error {
-	f, err := os.Create(filePath)
-	if err != nil {
-		return fmt.Errorf("failed to create file '%s': %w", filePath, err)
-	}
-	defer f.Close()
-
-	for key, value := range dotenv {
-		if _, err := f.WriteString(key + "=" + value + "\n"); err != nil {
-			return err
-		}
-	}
-
-	return nil
+	return dotenv, nil
 }

@@ -2,7 +2,6 @@ package genv_test
 
 import (
 	"context"
-	"os"
 	"testing"
 
 	"github.com/mrtc0/genv"
@@ -11,7 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestDotenvGenerator_Generate(t *testing.T) {
+func TestDotenvGenerator_FetchSecrets(t *testing.T) {
 	t.Parallel()
 
 	ctx := context.Background()
@@ -42,11 +41,6 @@ func TestDotenvGenerator_Generate(t *testing.T) {
 		},
 	}
 
-	file, err := os.CreateTemp("", ".env")
-	require.NoError(t, err)
-
-	defer os.Remove(file.Name())
-
 	svc, err := genv.NewSecretProviderService(ctx, config.SecretProvider)
 	require.NoError(t, err)
 	svc.AddSecretProviderClient("example-account", &mockSecretClient{
@@ -54,22 +48,19 @@ func TestDotenvGenerator_Generate(t *testing.T) {
 	})
 
 	generator := &genv.DotenvGenerator{
-		OutputFilePath:        file.Name(),
 		Config:                config,
 		SecretProviderService: svc,
 	}
 
-	err = generator.Generate(context.Background())
+	secrets, err := generator.FetchSecrets(ctx)
 	assert.NoError(t, err)
 
-	dotenv, err := os.ReadFile(file.Name())
-	require.NoError(t, err)
+	expected := map[string]string{
+		"EXAMPLE_ENV":    "example-value",
+		"EXAMPLE_SECRET": "secret-value",
+	}
 
-	expect := `EXAMPLE_ENV=example-value
-EXAMPLE_SECRET=secret-value
-`
-
-	assert.Equal(t, expect, string(dotenv))
+	assert.Equal(t, expected, secrets)
 }
 
 type mockSecretClient struct {
