@@ -14,6 +14,8 @@ import (
 func TestDotenvGenerator_Generate(t *testing.T) {
 	t.Parallel()
 
+	ctx := context.Background()
+
 	config := &genv.Config{
 		SecretProvider: genv.SecretProvider{
 			Aws: []genv.AwsProvider{
@@ -45,12 +47,18 @@ func TestDotenvGenerator_Generate(t *testing.T) {
 
 	defer os.Remove(file.Name())
 
+	svc, err := genv.NewSecretProviderService(ctx, config.SecretProvider)
+	require.NoError(t, err)
+	svc.AddSecretProviderClient("example-account", &mockSecretClient{
+		returnSecretValue: []byte("secret-value"),
+	})
+
 	generator := &genv.DotenvGenerator{
-		OutputFilePath: file.Name(),
-		Config:         config,
+		OutputFilePath:        file.Name(),
+		Config:                config,
+		SecretProviderService: svc,
 	}
 
-	generator.AddSecretProviderClient("example-account", &mockSecretClient{})
 	err = generator.Generate(context.Background())
 	assert.NoError(t, err)
 
@@ -64,8 +72,10 @@ EXAMPLE_SECRET=secret-value
 	assert.Equal(t, expect, string(dotenv))
 }
 
-type mockSecretClient struct{}
+type mockSecretClient struct {
+	returnSecretValue []byte
+}
 
 func (m *mockSecretClient) GetSecret(ctx context.Context, ref provider.SecretRef) ([]byte, error) {
-	return []byte("secret-value"), nil
+	return m.returnSecretValue, nil
 }

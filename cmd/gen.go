@@ -28,6 +28,9 @@ var genCmd = &cobra.Command{
 			Config:         cfg,
 			OutputFilePath: outputFilePath,
 		})
+		if err != nil {
+			return fmt.Errorf("failed to create dotenv generator: %w", err)
+		}
 
 		if err := generator.Generate(ctx); err != nil {
 			return fmt.Errorf("failed to generate .env file: %w", err)

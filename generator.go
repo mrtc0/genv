@@ -2,11 +2,8 @@ package genv
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"os"
-
-	"github.com/mrtc0/genv/provider"
 )
 
 var (
@@ -21,19 +18,19 @@ type DotenvGeneratorConfig struct {
 type DotenvGenerator struct {
 	OutputFilePath        string
 	Config                *Config
-	secretProviderClients map[string]provider.SecretClient
+	SecretProviderService *SecretProviderService
 }
 
 func NewDotenvGenerator(ctx context.Context, config DotenvGeneratorConfig) (*DotenvGenerator, error) {
-	secretProviderClients, err := NewSecretProviderClient(ctx, config.Config.SecretProvider)
+	svc, err := NewSecretProviderService(ctx, config.Config.SecretProvider)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create secret provider client: %w", err)
+		return nil, fmt.Errorf("failed to create secret provider, %w", err)
 	}
 
 	return &DotenvGenerator{
 		OutputFilePath:        config.OutputFilePath,
 		Config:                config.Config,
-		secretProviderClients: secretProviderClients,
+		SecretProviderService: svc,
 	}, nil
 }
 
@@ -45,12 +42,7 @@ func (d DotenvGenerator) Generate(ctx context.Context) error {
 		}
 
 		if envValue.SecretRef != nil {
-			client, ok := d.secretProviderClients[envValue.SecretRef.Provider]
-			if !ok {
-				return errors.New("secret provider client not found")
-			}
-
-			secret, err := client.GetSecret(ctx, provider.SecretRef{
+			secret, err := d.SecretProviderService.GetSecret(ctx, envValue.SecretRef.Provider, GetSecretInput{
 				Key:      envValue.SecretRef.Key,
 				Property: envValue.SecretRef.Property,
 			})
@@ -71,14 +63,6 @@ func (d DotenvGenerator) Generate(ctx context.Context) error {
 	}
 
 	return nil
-}
-
-func (d *DotenvGenerator) AddSecretProviderClient(providerID string, client provider.SecretClient) {
-	if d.secretProviderClients == nil {
-		d.secretProviderClients = make(map[string]provider.SecretClient)
-	}
-
-	d.secretProviderClients[providerID] = client
 }
 
 func writeDotenvFile(filePath string, dotenv map[string]string) error {
