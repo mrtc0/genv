@@ -12,7 +12,7 @@ import (
 
 var (
 	dotenvFilePath string
-	nameOnly       bool
+	ignoreValue    bool
 )
 
 var outdatedCmd = &cobra.Command{
@@ -31,7 +31,7 @@ var outdatedCmd = &cobra.Command{
 			return fmt.Errorf("failed to read dotenv file: %w", err)
 		}
 
-		diff, err := genv.Diff(ctx, cfg, dotenvMap, nameOnly)
+		diff, err := genv.Diff(ctx, cfg, dotenvMap, ignoreValue)
 		if err != nil {
 			return fmt.Errorf("failed to diff envs: %w", err)
 		}
@@ -49,6 +49,6 @@ var outdatedCmd = &cobra.Command{
 func init() {
 	outdatedCmd.Flags().StringVar(&genvFilePath, "config", ".genv.yaml", "Path to the genv config file.")
 	outdatedCmd.Flags().StringVar(&dotenvFilePath, "envfile", ".env", "Path to the dotenv file.")
-	outdatedCmd.Flags().BoolVar(&nameOnly, "name-only", false, "Only the differences in the variable names of the environment variables are checked. No values are retrieved from remote credential providers.")
+	outdatedCmd.Flags().BoolVar(&ignoreValue, "--ignore-value", false, "Only the differences in the variable names of the environment variables are checked. No values are retrieved from remote credential providers.")
 	rootCmd.AddCommand(outdatedCmd)
 }

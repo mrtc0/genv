@@ -12,8 +12,8 @@ const (
 
 // Diff compares the environment variables defined in the config with the
 // environment variables in the dotenv map.
-func Diff(ctx context.Context, cfg *Config, envMap map[string]string, nameOnly bool) (*diff.Diff, error) {
-	if nameOnly {
+func Diff(ctx context.Context, cfg *Config, envMap map[string]string, ignoreValue bool) (*diff.Diff, error) {
+	if ignoreValue {
 		return DiffEnvName(ctx, cfg, envMap)
 	}
 
