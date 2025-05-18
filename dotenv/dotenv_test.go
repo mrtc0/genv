@@ -1,9 +1,9 @@
-package genv_test
+package dotenv_test
 
 import (
 	"testing"
 
-	"github.com/mrtc0/genv"
+	"github.com/mrtc0/genv/dotenv"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -77,7 +77,7 @@ EXAMPLE_SECRET="secret-value"`,
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
-			result, err := genv.Marshal(tt.envMap)
+			result, err := dotenv.Marshal(tt.envMap)
 			require.NoError(t, err)
 			assert.Equal(t, tt.expected, result)
 		})
@@ -179,7 +179,7 @@ EXAMPLE_ENV="example-value"`),
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
-			result, err := genv.Unmarshal(tt.content)
+			result, err := dotenv.Unmarshal(tt.content)
 			require.NoError(t, err)
 			assert.Equal(t, tt.expected, result)
 		})

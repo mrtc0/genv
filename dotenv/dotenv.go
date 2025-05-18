@@ -1,4 +1,4 @@
-package genv
+package dotenv
 
 import (
 	"bytes"
@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-func WriteDotenvFile(filename string, envMap map[string]string) error {
+func WriteFile(filename string, envMap map[string]string) error {
 	content, err := Marshal(envMap)
 	if err != nil {
 		return err
@@ -27,7 +27,7 @@ func WriteDotenvFile(filename string, envMap map[string]string) error {
 	return file.Sync()
 }
 
-func ReadDotenvFile(filename string) (map[string]string, error) {
+func ReadFile(filename string) (map[string]string, error) {
 	file, err := os.Open(filename)
 	if err != nil {
 		return nil, err

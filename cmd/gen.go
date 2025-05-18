@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/mrtc0/genv"
+	"github.com/mrtc0/genv/dotenv"
 	"github.com/spf13/cobra"
 )
 
@@ -37,7 +38,7 @@ var genCmd = &cobra.Command{
 			return fmt.Errorf("failed to generate .env file: %w", err)
 		}
 
-		if err := genv.WriteDotenvFile(outputFilePath, secrets); err != nil {
+		if err := dotenv.WriteFile(outputFilePath, secrets); err != nil {
 			return fmt.Errorf("failed to write .env file: %w", err)
 		}
 
