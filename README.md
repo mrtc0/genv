@@ -12,14 +12,16 @@ $ go install github.com/mrtc0/genv/cmd/genv@latest
 
 - [x] AWS Secrets Manager
 
-# Guide
+# Getting Started
 
-## 1. Create a genv setting file
+## Generate .env file
 
-Now, create a setting file that describes the third-party secrets provider and the definition of the environment variables to be generated.
-genv reads a file named `genv.yaml` by default.
+Create a YAML file that defines the third-party secret provider and environment variables.
+
+> **NOTE**: genv looks for .genv.yaml by default, but you can specify a different file with the --config option.
 
 ```yaml
+# .genv.yaml
 secretProvider:
   aws:
     - id: example-account
@@ -53,15 +55,37 @@ envs:
 In this example, we define an environment variable `APP_ENV=development`, while the environment variables `API_KEY` and `DB_PASSWORD` are retrieved from AWS Secrets Manager.
 When the value stored in Secrets Manager is in JSON format, you can specify a property using the `property` field.
 
-## 2. Generate .env file
+Run `genv gen`, a `.env` file is generated based on the above configuration.
 
-Run the following command to generate a `.env` file.
-
-```bash
+```shell
 $ genv gen
 
 $ cat .env
 APP_ENV=development
-API_KEY=dummy-api-key
-DB_PASSWORD=dummy-db-password
+API_KEY=this-is-a-secret
+DB_PASSWORD=password
+```
+
+## Detect outdated environment variable definitions
+
+The `genv outdated` command compares the environment variables defined in genv.yaml with the environment variables in the .env file.
+
+```shell
+$ genv outdated
+~ DB_PASSWORD  =  "password" => "new-password"
+
+Error: outdated envs found
+exit status 1
+```
+
+If you want to ignore changes in environment variable values, use the `--ignore-value` option. With this option, values won't be retrieved from authentication providers.
+This is useful when you want to avoid accessing credential providers.
+
+```shell
+$ genv outdated --ignore-value
++ DB_HOST      =  "(value not retrieved)"
+- DB_PASSWORD  =  "(value not retrieved)"
+
+Error: outdated envs found
+exit status 1
 ```
