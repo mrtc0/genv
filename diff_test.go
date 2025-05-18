@@ -32,8 +32,8 @@ func TestDiffEnvName(t *testing.T) {
 				"VALUE_CHANGED_ENV": "old-value",
 			},
 			expected: diff.Diff{
-				Added:   map[string]string{"NEW_DEFINED_ENV": "(value not fetched)"},
-				Removed: map[string]string{"REMOVED_ENV": "(value not fetched)"},
+				Added:   map[string]string{"NEW_DEFINED_ENV": "(value not retrieved)"},
+				Removed: map[string]string{"REMOVED_ENV": "(value not retrieved)"},
 				// The value has changed, but since only the name is used to take the difference,
 				// the value is not included in the difference
 				Changed: map[string]diff.ChangeValue{},

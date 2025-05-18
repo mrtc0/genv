@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	unfetchedValuePlaceholder = "(value not fetched)"
+	notRetrievedValue = "(value not retrieved)"
 )
 
 // Diff compares the environment variables defined in the config with the
@@ -26,12 +26,12 @@ func Diff(ctx context.Context, cfg *Config, envMap map[string]string, ignoreValu
 func DiffEnvName(ctx context.Context, cfg *Config, envMap map[string]string) (*diff.Diff, error) {
 	definedEnv := make(map[string]string)
 	for key := range cfg.Envs {
-		definedEnv[key] = unfetchedValuePlaceholder
+		definedEnv[key] = notRetrievedValue
 	}
 
 	scrubbedEnvMap := make(map[string]string)
 	for key := range envMap {
-		scrubbedEnvMap[key] = unfetchedValuePlaceholder
+		scrubbedEnvMap[key] = notRetrievedValue
 	}
 
 	return diffEnvMap(scrubbedEnvMap, definedEnv), nil
