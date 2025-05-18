@@ -6,30 +6,41 @@ import (
 	"github.com/mrtc0/genv/diff"
 )
 
-func Diff(ctx context.Context, cfg *Config, dotenv map[string]string, nameOnly bool) (*diff.Diff, error) {
+const (
+	unfetchedValuePlaceholder = "(value not fetched)"
+)
+
+// Diff compares the environment variables defined in the config with the
+// environment variables in the dotenv map.
+func Diff(ctx context.Context, cfg *Config, envMap map[string]string, nameOnly bool) (*diff.Diff, error) {
 	if nameOnly {
-		return DiffEnvName(ctx, cfg, dotenv)
+		return DiffEnvName(ctx, cfg, envMap)
 	}
 
-	return DiffEnv(ctx, cfg, dotenv)
+	return DiffEnv(ctx, cfg, envMap)
 }
 
-func DiffEnvName(ctx context.Context, cfg *Config, dotenv map[string]string) (*diff.Diff, error) {
+// DiffEnvName compares the environment variables defined in the config with
+// the environment variables in the dotenv map, but only the names of the
+// environment variables are used to take the difference.
+func DiffEnvName(ctx context.Context, cfg *Config, envMap map[string]string) (*diff.Diff, error) {
 	definedEnv := make(map[string]string)
 	for key := range cfg.Envs {
-		definedEnv[key] = ""
+		definedEnv[key] = unfetchedValuePlaceholder
 	}
 
-	scrubbed := make(map[string]string)
-	for key := range dotenv {
-		scrubbed[key] = ""
+	scrubbedEnvMap := make(map[string]string)
+	for key := range envMap {
+		scrubbedEnvMap[key] = unfetchedValuePlaceholder
 	}
 
-	diff := diff.DiffEnvMap(definedEnv, scrubbed)
-	return &diff, nil
+	return diffEnvMap(scrubbedEnvMap, definedEnv), nil
 }
 
-func DiffEnv(ctx context.Context, cfg *Config, dotenv map[string]string) (*diff.Diff, error) {
+// DiffEnv compares the environment variables defined in the config with
+// the environment variables in the dotenv map, including the values of the
+// environment variables.
+func DiffEnv(ctx context.Context, cfg *Config, envMap map[string]string) (*diff.Diff, error) {
 	generator, err := NewDotenvGenerator(ctx, DotenvGeneratorConfig{
 		Config: cfg,
 	})
@@ -42,19 +53,10 @@ func DiffEnv(ctx context.Context, cfg *Config, dotenv map[string]string) (*diff.
 		return nil, err
 	}
 
-	diff := diff.DiffEnvMap(dotenv, fetched)
-	return &diff, nil
+	return diffEnvMap(envMap, fetched), nil
 }
 
-func extractKeys(envMap map[string]string) map[string]string {
-	keys := make(map[string]string, len(envMap))
-	for k := range envMap {
-		keys[k] = ""
-	}
-	return keys
-}
-
-func diffEnvMap(a, b map[string]string) *diff.Diff {
-	d := diff.DiffEnvMap(a, b)
+func diffEnvMap(old, new map[string]string) *diff.Diff {
+	d := diff.DiffEnvMap(old, new)
 	return &d
 }
