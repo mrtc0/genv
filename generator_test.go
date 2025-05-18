@@ -16,18 +16,7 @@ func TestDotenvGenerator_FetchSecrets(t *testing.T) {
 	ctx := context.Background()
 
 	config := &genv.Config{
-		SecretProvider: genv.SecretProvider{
-			Aws: []genv.AwsProvider{
-				{
-					ID:      "example-account",
-					Service: "secretsmanager",
-					Region:  "us-east-1",
-					Auth: genv.AwsAuth{
-						Profile: "default",
-					},
-				},
-			},
-		},
+		SecretProvider: genv.SecretProvider{},
 		Envs: map[string]genv.EnvValue{
 			"EXAMPLE_ENV": {
 				Value: "example-value",
