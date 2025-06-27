@@ -12,6 +12,28 @@ $ go install github.com/mrtc0/genv/cmd/genv@latest
 
 - [x] AWS Secrets Manager
 
+# Usage
+
+The following is given by running `genv -h`:
+
+```bash
+Usage:
+  genv [command]
+
+Available Commands:
+  completion  Generate the autocompletion script for the specified shell
+  gen         Generate .env file
+  help        Help about any command
+  outdated    Show outdated envs in the dotenv file.
+  run         Run a command with environment variables from .env file
+
+Flags:
+  -h, --help   help for genv
+
+Use "genv [command] --help" for more information about a command.
+```
+
+
 # Getting Started
 
 ## Generate .env file
