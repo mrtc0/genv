@@ -3,8 +3,8 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"os/exec"
 
+	"github.com/mrtc0/genv"
 	"github.com/mrtc0/genv/dotenv"
 	"github.com/spf13/cobra"
 )
@@ -35,18 +35,18 @@ func run(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("failed to read .env file: %w", err)
 	}
 
-	for k, v := range envMap {
-		if err := os.Setenv(k, v); err != nil {
-			return fmt.Errorf("failed to set environment variable %s: %w", k, err)
-		}
+	runner, err := genv.NewCommandRunner(genv.CommandRunnerConfig{
+		Name:   args[0],
+		Args:   args[1:],
+		Envs:   envMap,
+		Stdout: os.Stdout,
+		Stderr: os.Stderr,
+	})
+	if err != nil {
+		return fmt.Errorf("failed to create command runner: %w", err)
 	}
 
-	command := exec.Command(args[0], args[1:]...)
-	command.Env = os.Environ()
-	command.Stdout = os.Stdout
-	command.Stderr = os.Stderr
-
-	if err := command.Run(); err != nil {
+	if err := runner.Run(); err != nil {
 		return fmt.Errorf("failed to run command: %w", err)
 	}
 	return nil
