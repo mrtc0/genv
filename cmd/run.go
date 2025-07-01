@@ -34,13 +34,15 @@ func run(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return fmt.Errorf("failed to read .env file: %w", err)
 	}
-	envs, err := dotenv.Marshal(envMap)
-	if err != nil {
-		return fmt.Errorf("failed to marshal environment variables: %w", err)
+
+	for k, v := range envMap {
+		if err := os.Setenv(k, v); err != nil {
+			return fmt.Errorf("failed to set environment variable %s: %w", k, err)
+		}
 	}
 
 	command := exec.Command(args[0], args[1:]...)
-	command.Env = append(os.Environ(), envs)
+	command.Env = os.Environ()
 	command.Stdout = os.Stdout
 	command.Stderr = os.Stderr
 
