@@ -3,7 +3,7 @@ module github.com/mrtc0/genv
 go 1.24.2
 
 require (
-	github.com/aws/aws-sdk-go-v2 v1.38.2
+	github.com/aws/aws-sdk-go-v2 v1.39.0
 	github.com/aws/aws-sdk-go-v2/config v1.31.4
 	github.com/aws/aws-sdk-go-v2/service/secretsmanager v1.39.1
 	github.com/google/go-cmp v0.7.0
