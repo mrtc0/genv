@@ -5,6 +5,8 @@ import "context"
 const (
 	// AWSProviderName is the name of the AWS provider.
 	AWSProviderName ProviderName = "aws"
+	// OnePasswordProviderName is the name of the 1Password provider.
+	OnePasswordProviderName ProviderName = "1password"
 )
 
 type ProviderName string

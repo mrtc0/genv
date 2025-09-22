@@ -12,7 +12,8 @@ type Config struct {
 }
 
 type SecretProvider struct {
-	Aws []AwsProvider `yaml:"aws,omitempty"`
+	Aws         []AwsProvider         `yaml:"aws,omitempty"`
+	OnePassword []OnePasswordProvider `yaml:"1password,omitempty"`
 }
 
 type AwsProvider struct {
@@ -20,6 +21,11 @@ type AwsProvider struct {
 	Service string  `yaml:"service"`
 	Region  string  `yaml:"region,omitempty"`
 	Auth    AwsAuth `yaml:"auth,omitempty"`
+}
+
+type OnePasswordProvider struct {
+	ID      string `yaml:"id"`
+	Account string `yaml:"account,omitempty"`
 }
 
 type AwsAuth struct {
