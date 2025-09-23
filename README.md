@@ -186,3 +186,5 @@ envs:
       provider: example.1password.com
       key: "op://some-vault/some-item/field"
 ```
+
+Currently, genv supports 1Password CLI (`op` command) authentication and Service Account authentication. Authentication using 1Password Connect is not supported.
