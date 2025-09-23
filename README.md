@@ -11,6 +11,7 @@ $ go install github.com/mrtc0/genv/cmd/genv@latest
 # Supported Secrets Providers
 
 - [x] AWS Secrets Manager
+- [x] 1Password (via CLI or Service Account)
 
 # Usage
 
@@ -32,7 +33,6 @@ Flags:
 
 Use "genv [command] --help" for more information about a command.
 ```
-
 
 # Getting Started
 
@@ -110,4 +110,79 @@ $ genv outdated --ignore-value
 
 Error: outdated envs found
 exit status 1
+```
+
+# Supported Providers
+
+## AWS Secrets Manager
+
+If you want to use AWS Secrets Manager as a secret provider, you can configure it as follows:
+
+```yaml
+# .genv.yaml
+secretProvider:
+  aws:
+    - id: example-account
+      service: SecretsManager
+      region: us-east-1
+      auth:
+        # If you want to use a specific AWS profile, specify it here
+        profile: default
+        # If you want to use a specific Shared Credentials File
+        # sharedCredentialsFiles: ["/path/to/credentials"]
+        # If you want to use a specific Shared Configuration File
+        # sharedConfigFiles: ["/path/to/config"]
+    - id: another-account
+      service: SecretsManager
+      region: us-west-2
+
+envs:
+  API_KEY:
+    secretRef:
+      provider: example-account
+      key: apikey
+  DB_PASSWORD:
+    secretRef:
+      provider: another-account
+      key: db-credentials
+      property: ".password"
+```
+
+## 1Password
+
+If you want to use 1Password as a secret provider, you can configure it as follows:
+
+```yaml
+secretProvider:
+  1password:
+    - id: my.1password.com
+      auth:
+        # Possible values for method are "cli" and "service-account"
+        # If omitted, defaults to "cli"
+        # When using "cli" method, genv will execute the 1Password CLI (`op`) command.
+        # ref. https://developer.1password.com/docs/cli
+        method: cli
+        # account is optional when using "cli" method.
+        # If omitted, the default account configured in the `op` CLI will be used.
+        account: <your-account-id>
+    - id: example.1password.com
+      auth:
+        # If you want to use Service Account authentication,
+        # you must set the OP_SERVICE_ACCOUNT_TOKEN environment variable.
+        # ref. https://developer.1password.com/docs/service-accounts
+        method: service-account
+
+envs:
+  PASSWORD:
+    secretRef:
+      provider: my.1password.com
+      # For 1Password provider configurations, the key must be in the format of a secret reference URI.
+      #   op://<vault-name>/<item-name>/[section-name/]<field-name>
+      #   e.g., op://my-vault/my-item/password
+      # See details: https://developer.1password.com/docs/cli/secret-references
+      key: "op://some-vault/some-item/field"
+  API_KEY:
+    secretRef:
+      provider: example.1password.com
+      key: "op://some-vault/some-item/field"
 ```
