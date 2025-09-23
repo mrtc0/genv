@@ -3,6 +3,7 @@ package genv
 import (
 	"os"
 
+	"github.com/mrtc0/genv/provider/onepassword"
 	"gopkg.in/yaml.v3"
 )
 
@@ -12,7 +13,8 @@ type Config struct {
 }
 
 type SecretProvider struct {
-	Aws []AwsProvider `yaml:"aws,omitempty"`
+	Aws         []AwsProvider         `yaml:"aws,omitempty"`
+	OnePassword []OnePasswordProvider `yaml:"1password,omitempty"`
 }
 
 type AwsProvider struct {
@@ -26,6 +28,21 @@ type AwsAuth struct {
 	Profile                string   `yaml:"profile,omitempty"`
 	SharedCredentialsFiles []string `yaml:"sharedCredentialsFiles,omitempty"`
 	SharedConfigFiles      []string `yaml:"sharedConfigFiles,omitempty"`
+}
+
+type OnePasswordProvider struct {
+	ID   string          `yaml:"id"`
+	Auth OnePasswordAuth `yaml:"auth,omitempty"`
+}
+
+// OnePasswordAuth represents the authentication configuration for 1Password
+type OnePasswordAuth struct {
+	// The authentication method to use for 1Password
+	// Possible values are "cli" and "service-account"
+	// If omitted, defaults to "cli"
+	Method onepassword.OnePasswordAuthMethod `yaml:"method"`
+	// The account to use for 1Password (only applicable when Method is CLI)
+	Account string `yaml:"account,omitempty"`
 }
 
 type EnvValue struct {

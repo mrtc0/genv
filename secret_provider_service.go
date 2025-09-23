@@ -6,6 +6,7 @@ import (
 
 	"github.com/mrtc0/genv/provider"
 	"github.com/mrtc0/genv/provider/aws"
+	"github.com/mrtc0/genv/provider/onepassword"
 )
 
 type SecretProviderService struct {
@@ -29,6 +30,19 @@ func NewSecretProviderService(ctx context.Context, sp SecretProvider) (*SecretPr
 		client, err := awsProvider.NewClient(ctx)
 		if err != nil {
 			return nil, fmt.Errorf("failed to create secret client: %w", err)
+		}
+
+		secretProviderClients[p.ID] = client
+	}
+
+	for _, p := range sp.OnePassword {
+		opProvider := onepassword.NewProvider(
+			onepassword.WithAccount(p.Auth.Account),
+			onepassword.WithAuthMethod(p.Auth.Method),
+		)
+		client, err := opProvider.NewClient(ctx)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create 1Password secret client: %w", err)
 		}
 
 		secretProviderClients[p.ID] = client

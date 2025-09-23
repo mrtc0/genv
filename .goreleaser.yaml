@@ -14,7 +14,7 @@ builds:
       - windows
       - darwin
     ldflags:
-      - -s -w -X github.com/mrtc0/genv.Version={{ .Version }}
+      - -s -w -X github.com/mrtc0/genv/version.Version={{ .Version }}
 
 archives:
   - formats: [tar.gz]
