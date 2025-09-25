@@ -1,5 +1,7 @@
 # genv
 
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/mrtc0/genv/badge)](https://scorecard.dev/viewer/?uri=github.com/mrtc0/genv)
+
 genv is a tool for generating dotenv files by retrieving values from third-party services like AWS Secrets Manager
 
 # Install
