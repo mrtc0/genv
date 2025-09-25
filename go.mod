@@ -4,7 +4,7 @@ go 1.24.2
 
 require (
 	github.com/1password/onepassword-sdk-go v0.3.1
-	github.com/aws/aws-sdk-go-v2 v1.39.0
+	github.com/aws/aws-sdk-go-v2 v1.39.1
 	github.com/aws/aws-sdk-go-v2/config v1.31.9
 	github.com/aws/aws-sdk-go-v2/service/secretsmanager v1.39.4
 	github.com/google/go-cmp v0.7.0
