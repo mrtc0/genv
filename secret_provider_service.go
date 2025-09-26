@@ -6,6 +6,7 @@ import (
 
 	"github.com/mrtc0/genv/provider"
 	"github.com/mrtc0/genv/provider/aws"
+	"github.com/mrtc0/genv/provider/googlecloud"
 	"github.com/mrtc0/genv/provider/onepassword"
 )
 
@@ -30,6 +31,23 @@ func NewSecretProviderService(ctx context.Context, sp SecretProvider) (*SecretPr
 		client, err := awsProvider.NewClient(ctx)
 		if err != nil {
 			return nil, fmt.Errorf("failed to create secret client: %w", err)
+		}
+
+		secretProviderClients[p.ID] = client
+	}
+
+	for _, p := range sp.GoogleCloud {
+		providerConfig := googlecloud.GoogleCloudProvider{
+			ID:        p.ID,
+			Service:   p.Service,
+			ProjectID: p.ProjectID,
+			Location:  p.Location,
+		}
+
+		gc := googlecloud.NewProvider(&providerConfig)
+		client, err := gc.NewClient(ctx)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create Google Cloud secret client: %w", err)
 		}
 
 		secretProviderClients[p.ID] = client
