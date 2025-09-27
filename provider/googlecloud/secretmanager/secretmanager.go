@@ -19,12 +19,12 @@ type SecretManagerClientInterface interface {
 }
 
 type SecretManagerClient struct {
-	projectID string
-	location  string
+	ProjectID string
+	Location  string
 	Client    SecretManagerClientInterface
 }
 
-func NewSecretManager(ctx context.Context, projectID, location string) (*SecretManagerClient, error) {
+func NewSecretManagerClient(ctx context.Context, projectID, location string) (*SecretManagerClient, error) {
 	var opts []option.ClientOption
 	if location != "" {
 		endpoint := fmt.Sprintf("secretmanager.%s.rep.googleapis.com:443", location)
@@ -36,7 +36,7 @@ func NewSecretManager(ctx context.Context, projectID, location string) (*SecretM
 		return nil, err
 	}
 
-	return &SecretManagerClient{projectID: projectID, location: location, Client: client}, nil
+	return &SecretManagerClient{ProjectID: projectID, Location: location, Client: client}, nil
 }
 
 func (s *SecretManagerClient) GetSecret(ctx context.Context, ref provider.SecretRef) ([]byte, error) {
@@ -60,9 +60,9 @@ func (s *SecretManagerClient) GetSecret(ctx context.Context, ref provider.Secret
 }
 
 func (s *SecretManagerClient) buildResourceName(secretName string) string {
-	if s.location != "" {
-		return fmt.Sprintf("projects/%s/locations/%s/secrets/%s/versions/latest", s.projectID, s.location, secretName)
+	if s.Location != "" {
+		return fmt.Sprintf("projects/%s/locations/%s/secrets/%s/versions/latest", s.ProjectID, s.Location, secretName)
 	}
 
-	return fmt.Sprintf("projects/%s/secrets/%s/versions/latest", s.projectID, secretName)
+	return fmt.Sprintf("projects/%s/secrets/%s/versions/latest", s.ProjectID, secretName)
 }

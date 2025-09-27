@@ -37,7 +37,7 @@ func (p *Provider) NewClient(ctx context.Context) (provider.SecretClient, error)
 }
 
 func newClient(ctx context.Context, cfg *GoogleCloudProvider) (provider.SecretClient, error) {
-	return secretmanager.NewSecretManager(
+	return secretmanager.NewSecretManagerClient(
 		ctx,
 		cfg.ProjectID,
 		cfg.Location,

@@ -18,6 +18,8 @@ const (
 )
 
 func TestGetSecret(t *testing.T) {
+	t.Parallel()
+
 	ctx := t.Context()
 
 	type arrange struct {
@@ -139,12 +141,15 @@ func TestGetSecret(t *testing.T) {
 
 	for name, tc := range testCases {
 		t.Run(name, func(t *testing.T) {
-			manager, err := secretmanager.NewSecretManager(ctx, "dummy-project", tc.arrange.location)
-			require.NoError(t, err)
+			t.Parallel()
 
-			manager.Client = tc.arrange.mockClient
+			client := &secretmanager.SecretManagerClient{
+				ProjectID: dummyProjectID,
+				Location:  tc.arrange.location,
+				Client:    tc.arrange.mockClient,
+			}
 
-			secret, err := manager.GetSecret(ctx, tc.ref)
+			secret, err := client.GetSecret(ctx, tc.ref)
 			if tc.want.err {
 				require.Error(t, err)
 				return
