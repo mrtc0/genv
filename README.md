@@ -10,10 +10,13 @@ genv is a tool for generating dotenv files by retrieving values from third-party
 $ go install github.com/mrtc0/genv/cmd/genv@latest
 ```
 
-# Supported Secrets Providers
+# Supported Secret Providers
 
 - [x] AWS Secrets Manager
+- [x] Google Cloud Secret Manager
 - [x] 1Password (via CLI or Service Account)
+
+For details, see [Configuring Secret Providers](#configuring-secret-providers).
 
 # Usage
 
@@ -114,11 +117,11 @@ Error: outdated envs found
 exit status 1
 ```
 
-# Supported Providers
+# Configuring Secret Providers
 
 ## AWS Secrets Manager
 
-If you want to use AWS Secrets Manager as a secret provider, you can configure it as follows:
+Configure AWS Secrets Manager as a secret provider:
 
 ```yaml
 # .genv.yaml
@@ -147,12 +150,35 @@ envs:
     secretRef:
       provider: another-account
       key: db-credentials
+      # Optional. If the secret value is JSON, you can specify a property to retrieve specific field values
       property: ".password"
+```
+
+## Google Cloud Secret Manager
+
+Configure Google Cloud Secret Manager as a secret provider:
+
+```yaml
+secretProvider:
+  googleCloud:
+    - id: my-project
+      service: SecretManager
+      projectID: your-project-id
+      # Optional. If Regional Secret, specify the region in 'location'.
+      # location: us-central1
+
+envs:
+  API_KEY:
+    secretRef:
+      provider: my-project
+      key: credentials
+      # Optional. If the secret value is JSON, you can specify a property to retrieve specific field values
+      # property: ".api_key"
 ```
 
 ## 1Password
 
-If you want to use 1Password as a secret provider, you can configure it as follows:
+Configure 1Password as a secret provider:
 
 ```yaml
 secretProvider:
