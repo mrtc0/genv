@@ -2,12 +2,11 @@ package secretsmanager
 
 import (
 	"context"
-	"errors"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	awssm "github.com/aws/aws-sdk-go-v2/service/secretsmanager"
 	"github.com/mrtc0/genv/provider"
-	"github.com/tidwall/gjson"
+	"github.com/mrtc0/genv/provider/secretutil"
 )
 
 var _ provider.SecretClient = &SecretsManager{}
@@ -36,7 +35,7 @@ func (s *SecretsManager) GetSecret(ctx context.Context, ref provider.SecretRef) 
 		return secret, nil
 	}
 
-	val, err := s.getValueFromJSON(secret, ref.Property)
+	val, err := secretutil.GetValueFromJSON(secret, ref.Property)
 	if err != nil {
 		return nil, err
 	}
@@ -62,13 +61,4 @@ func (s *SecretsManager) fetch(ctx context.Context, key string) ([]byte, error) 
 	}
 
 	return result.SecretBinary, nil
-}
-
-func (s *SecretsManager) getValueFromJSON(secret []byte, property string) ([]byte, error) {
-	result := gjson.Get(string(secret), property)
-	if !result.Exists() {
-		return nil, errors.New("property not found in secret")
-	}
-
-	return []byte(result.String()), nil
 }

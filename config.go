@@ -14,6 +14,7 @@ type Config struct {
 
 type SecretProvider struct {
 	Aws         []AwsProvider         `yaml:"aws,omitempty"`
+	GoogleCloud []GoogleCloudProvider `yaml:"googleCloud,omitempty"`
 	OnePassword []OnePasswordProvider `yaml:"1password,omitempty"`
 }
 
@@ -28,6 +29,13 @@ type AwsAuth struct {
 	Profile                string   `yaml:"profile,omitempty"`
 	SharedCredentialsFiles []string `yaml:"sharedCredentialsFiles,omitempty"`
 	SharedConfigFiles      []string `yaml:"sharedConfigFiles,omitempty"`
+}
+
+type GoogleCloudProvider struct {
+	ID        string `yaml:"id"`
+	Service   string `yaml:"service"`
+	ProjectID string `yaml:"projectID"`
+	Location  string `yaml:"location,omitempty"`
 }
 
 type OnePasswordProvider struct {
