@@ -15,6 +15,7 @@ $ go install github.com/mrtc0/genv/cmd/genv@latest
 - [x] AWS Secrets Manager
 - [x] Google Cloud Secret Manager
 - [x] 1Password (via CLI or Service Account)
+- [x] Exec (arbitrary command)
 
 For details, see [Configuring Secret Providers](#configuring-secret-providers).
 
@@ -216,3 +217,39 @@ envs:
 ```
 
 Currently, genv supports 1Password CLI (`op` command) authentication and Service Account authentication. Authentication using 1Password Connect is not supported.
+
+## Exec
+
+The exec provider runs an arbitrary command, parses its JSON stdout, and exposes the values as secrets.
+This is useful for wrapping custom credential helpers or piping through tools like `jq`.
+
+The `command` field accepts two forms:
+
+- **String** — passed to `sh -c`, so pipes and redirections work.
+- **Sequence** — executed directly via `execve` without a shell, which is safer when arguments are static.
+
+```yaml
+secretProvider:
+  exec:
+    # String form: shell features such as pipes are available
+    - id: vault-jq
+      command: "vault kv get -format=json secret/myapp | jq .data"
+
+    # Sequence form: executed directly, no shell involved
+    - id: my-tool
+      command: ["my-credential-helper", "--format=json", "get", "myapp"]
+
+envs:
+  API_KEY:
+    secretRef:
+      provider: vault-jq
+      # ref.Key is a gjson path into the command's JSON output
+      key: api_key
+  DB_PASSWORD:
+    secretRef:
+      provider: my-tool
+      key: db_credentials
+      # Optional. If the value at 'key' is itself a JSON string,
+      # 'property' is applied as a second gjson path.
+      property: password
+```

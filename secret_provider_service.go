@@ -6,6 +6,7 @@ import (
 
 	"github.com/mrtc0/genv/provider"
 	"github.com/mrtc0/genv/provider/aws"
+	"github.com/mrtc0/genv/provider/exec"
 	"github.com/mrtc0/genv/provider/googlecloud"
 	"github.com/mrtc0/genv/provider/onepassword"
 )
@@ -61,6 +62,19 @@ func NewSecretProviderService(ctx context.Context, sp SecretProvider) (*SecretPr
 		client, err := opProvider.NewClient(ctx)
 		if err != nil {
 			return nil, fmt.Errorf("failed to create 1Password secret client: %w", err)
+		}
+
+		secretProviderClients[p.ID] = client
+	}
+
+	for _, p := range sp.Exec {
+		execProvider := exec.NewProvider(&exec.ExecProviderConfig{
+			ID:      p.ID,
+			Command: p.Command.Args,
+		})
+		client, err := execProvider.NewClient(ctx)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create exec secret client: %w", err)
 		}
 
 		secretProviderClients[p.ID] = client
